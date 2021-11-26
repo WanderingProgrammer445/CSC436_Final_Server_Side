@@ -7,7 +7,7 @@ var logger = require('morgan');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 var toDosRouter = require('./routes/todos');
-require('./models/setupMongo')();
+require('./models/setUpMongo')();
 
 var app = express();
 
