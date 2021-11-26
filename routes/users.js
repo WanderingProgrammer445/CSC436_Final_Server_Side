@@ -3,7 +3,7 @@ var router = express.Router();
 const User = require('../models/User');
 var jwt = require('jsonwebtoken');
 
-const privateKey = "Redacted"
+const privateKey = "Redacted";
 
 router.use(function(req, res, next) {
   try{

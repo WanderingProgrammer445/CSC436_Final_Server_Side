@@ -3,7 +3,7 @@ var router = express.Router();
 const ToDo = require('../models/ToDo');
 var jwt = require('jsonwebtoken');
 
-const privateKey = "Redacted"
+const privateKey = "Redacted";
 
 router.use(function (req, res, next) {
 
@@ -23,8 +23,8 @@ router.use(function (req, res, next) {
 
 router.get('/:id', async function (req, res, next) {
 
-  const todo = await ToDo.find().where(_id).equals(req.params.id).exec()
-  console.log(todo);
+  const todo = await ToDo.find().where('_id').equals(req.params.id).exec()
+  //console.log(todo);
 
 
 
@@ -40,21 +40,22 @@ router.put('/:id', async function (req, res, next) {
     res.status(401).json({ error: "No token" })
   }
 
-  const todos = await ToDo.findOne().where(_id).equals(req.params.id).exec()
+  const todos = await ToDo.findOne().where('_id').equals(req.params.id).exec()
 
-  if (req.payload !== todos.author) {
+  if (req.payload.id !== todos.author) {
     res.status(401).json({ error: "Unauthorized update" })
-  }
+  }else{
   todos.title = req.body.title;
   todos.description = req.body.description;
   todos.dateCreated = req.body.dateCreated;
   todos.complete = req.body.complete;
   todos.dateCompleted = req.body.dateCompleted;
-  todos.author = req.body.author;
+  
   console.log(todos);
-  todos.save().then(savedToDo => {
+  await todos.save().then(savedToDo => {
     res.status(200).json(savedToDo);
   })
+}
 
 
 
@@ -69,18 +70,18 @@ router.delete('/:id', async function (req, res, next) {
     res.status(401).json({ error: "No token" })
   }
 
-  const todos = await ToDo.findOne().where(_id).equals(req.params.id).exec()
+  const todos = await ToDo.findOne().where('_id').equals(req.params.id).exec()
   console.log(todos);
 
 
-  if (req.payload !== todo.author) {
+  if (req.payload.id !== todos.author) {
     res.status(401).json({ error: "Unauthorized delete" })
-  }
+  }else{
 
-  ToDo.deleteOne({ _id: todos._id })
+  todos.deleteOne()
 
   res.status(200).json({ message: "Deleted ToDo" })
-
+  }
 
 
 
@@ -90,7 +91,7 @@ router.delete('/:id', async function (req, res, next) {
 });
 
 router.get('/', async function (req, res, next) {
-
+/*
 
   if (req.body.userId) {
       const todos = await ToDo.find(req.body.userId).exec();
@@ -102,6 +103,25 @@ router.get('/', async function (req, res, next) {
     console.log(todos);
     res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
   
+  }
+*/
+    if (req.body.userId) {
+      const todos = await ToDo.find(req.body.userId).exec();
+      //console.log(todos);
+      if(!req.payload){
+         res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
+      }
+      else{
+        res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: todo.author === req.payload.id, id: todo._id })))
+      }
+  } else {
+    const todos = await ToDo.find().exec();
+    //console.log(todos);
+    if(!req.payload){
+    res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
+    }else{
+      res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: todo.author === req.payload.id, id: todo._id })))
+    }
   }
 
 
