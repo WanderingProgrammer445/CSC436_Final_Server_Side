@@ -21,17 +21,15 @@ router.use(function (req, res, next) {
 
 
 
-router.get('/:id', async function (req, res, next) {
+router.get('/byUserId/:userId', async function (req, res, next) {
 
-  const todo = await ToDo.find().where('_id').equals(req.params.id).exec()
-  //console.log(todo);
-
-
-
-
-
-  res.status(200).json({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: (req.payload && (req.payload.id === todo.author)), id: todo._id });
-
+  const todos = await ToDo.find().where('author').equals(req.params.userId).exec()
+  console.log(todos);
+  if(!req.payload){
+    res.status(200).json(todos.map((todo)=>({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })));
+  }else{
+  res.status(200).json(todos.map((todo) =>({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: (req.payload && (req.payload.id === todo.author)), id: todo._id })));
+  }
 });
 
 router.put('/:id', async function (req, res, next) {
@@ -91,30 +89,7 @@ router.delete('/:id', async function (req, res, next) {
 });
 
 router.get('/', async function (req, res, next) {
-/*
-
-  if (req.body.userId) {
-      const todos = await ToDo.find(req.body.userId).exec();
-      console.log(todos);
-      res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
-  
-  } else {
-    const todos = await ToDo.find().exec();
-    console.log(todos);
-    res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
-  
-  }
-*/
-    if (req.body.userId) {
-      const todos = await ToDo.find(req.body.userId).exec();
-      //console.log(todos);
-      if(!req.payload){
-         res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: false, id: todo._id })))
-      }
-      else{
-        res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: todo.author === req.payload.id, id: todo._id })))
-      }
-  } else {
+    
     const todos = await ToDo.find().exec();
     //console.log(todos);
     if(!req.payload){
@@ -122,7 +97,7 @@ router.get('/', async function (req, res, next) {
     }else{
       res.status(200).json(todos.map((todo) => ({ title: todo.title, description: todo.description, dateCreated: todo.dateCreated, dateCompleted: todo.dateCompleted, complete: todo.complete, author: todo.author, canToggleOrDelete: todo.author === req.payload.id, id: todo._id })))
     }
-  }
+  
 
 
 
